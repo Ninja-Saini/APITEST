@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -15,11 +16,16 @@ country_capitals = {
     "china": "Beijing"
 }
 
-@app.get("/get-capital")
-def get_capital(country: str):
-    country_lower = country.lower()
+# Request body model
+class CountryRequest(BaseModel):
+    country: str
+
+# POST endpoint to get capital from body
+@app.post("/get-capital")
+def get_capital(request: CountryRequest):
+    country_lower = request.country.lower()
     capital = country_capitals.get(country_lower)
     if capital:
-        return {"country": country.title(), "capital": capital}
+        return {"country": request.country.title(), "capital": capital}
     else:
         raise HTTPException(status_code=404, detail="Country not found")
